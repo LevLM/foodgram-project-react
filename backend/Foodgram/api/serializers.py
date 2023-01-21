@@ -40,8 +40,8 @@ class TagSerializer(serializers.ModelSerializer):
     color = serializers.ChoiceField(choices=COLOR_CHOICES)
 
     class Meta:
-        fields = '__all__'
         model = Tag
+        fields = '__all__'
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -115,16 +115,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = '__all__'
 
-    def validate(self, data):
-        if Favorite.objects.filter(
-                user=self.context.get('request').user,
-                recipe=data['recipe']
-        ).exists():
-            raise serializers.ValidationError({
-                'status': 'Already in Favorite'
-            })
-        return data
-
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     
@@ -132,20 +122,14 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         model = ShoppingCart
         fields = '__all__'
 
-    def validate(self, data):
-        if ShoppingCart.objects.filter(
-                user=self.context['request'].user,
-                recipe=data['recipe']
-        ):
-            raise serializers.ValidationError('Already in ShoppingCart')
-        return data
-
 
 class RecipeSerializer(serializers.ModelSerializer):
     
     class Meta:
-        fields = '__all__'
         model = Recipe
+        fields = ('id', 'tags', 'author', 'name', 'text',
+                  'image', 'ingredients', 'cooking_time',
+                  'is_favorited', 'is_in_shopping_cart')
 
     image = Base64ImageField()
     author = UserSerializer(read_only=True)

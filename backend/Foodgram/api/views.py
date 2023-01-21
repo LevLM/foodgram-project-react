@@ -10,7 +10,6 @@ from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from api.filters import RecipeFilter
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
                             Recipe, ShoppingCart, Tag)
 from users.models import User
@@ -33,7 +32,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     serializer_class = RecipeSerializer
-    filterset_class = RecipeFilter
+    filterset_fields = ('tags',) 
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -43,24 +42,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True,
         methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated, ]
+        permission_classes=[IsAuthenticated, ],
+        filter_backends = (DjangoFilterBackend,),
+        filterset_fields = ('tags',) 
     )
-    def favorite(self, request):
-        recipe = get_object_or_404(Recipe, id=self.get('pk'))
+    def favorite(self, request, *args, **kwargs):
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
-            if Favorite.objects.filter(author=user,
+            if Favorite.objects.filter(user=user,
                                        recipe=recipe).exists():
                 return Response({'error, this Recipe already added'},
                                 status=status.HTTP_400_BAD_REQUEST)
             serializer = FavoriteSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                serializer.save(author=user, recipe=recipe)
+                serializer.save(user=user, recipe=recipe)
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
-        if not Favorite.objects.filter(author=user,
+        if not Favorite.objects.filter(user=user,
                                        recipe=recipe).exists():
             return Response({'error, Favorite not found'},
                             status=status.HTTP_404_NOT_FOUND)
@@ -68,26 +69,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('Recipe deleted from Favorite',
                         status=status.HTTP_204_NO_CONTENT)
 
+
     @action(detail=True,
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated, ]
     )
-    def shopping_cart(self, request):
-        recipe = get_object_or_404(Recipe, id=self.get('pk'))
+    def shopping_cart(self, request, **kwargs):
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(author=user,
+            if ShoppingCart.objects.filter(user=user,
                                            recipe=recipe).exists():
                 return Response({'error, this recipe already added'},
                                 status=status.HTTP_400_BAD_REQUEST)
             serializer = ShoppingCartSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                serializer.save(author=user, recipe=recipe)
+                serializer.save(user=user, recipe=recipe)
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
-        if not ShoppingCart.objects.filter(author=user,
+        if not ShoppingCart.objects.filter(user=user,
                                            recipe=recipe).exists():
             return Response({'error, ShoppingCart not found'},
                             status=status.HTTP_404_NOT_FOUND)
