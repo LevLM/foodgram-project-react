@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Tag, IngredientNumber
+from .models import Ingredient, IngredientNumber, Recipe, Tag
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -21,7 +21,6 @@ class RecipeAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit') 
     list_filter = ('name',)
-    inlines = (RecipeIngredientInline, )
 
 
 class TagAdmin(admin.ModelAdmin):

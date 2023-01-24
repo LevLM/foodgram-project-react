@@ -1,7 +1,7 @@
 import uuid
 
-from django.db import models
 from django.core import validators
+from django.db import models
 
 from users.models import User
 
@@ -80,18 +80,18 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='follower',
     )
-    author = models.ForeignKey(
+    following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author'
+        related_name='following'
     )
 
     
     class Meta:
-        ordering = ('-author_id',)
+        # ordering = ('-author_id',)
         constraints = [
-            models.UniqueConstraint(fields=['user', 'author'],
-                                    name='user_author')
+            models.UniqueConstraint(fields=['user', 'following'],
+                                    name='user_following')
         ]
 
     def __str__(self):

@@ -50,25 +50,25 @@ class FollowSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    author = serializers.SlugRelatedField(
+    following = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all()
     )
 
-    def validate_following(self, author):
-        if self.context['request'].user == author:
+    def validate_following(self, following):
+        if self.context['request'].user == following:
             raise serializers.ValidationError(
-                {'author': 'Нельзя подписаться на самого себя'}
+                {'following': 'Нельзя подписаться на самого себя'}
             )
-        return author
+        return following
 
     class Meta:
-        fields = ('user', 'author')
+        fields = ('user', 'following')
         model = Follow
         validators = [
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
-                fields=['user', 'author']
+                fields=['user', 'following']
             )
         ]
 
@@ -97,10 +97,11 @@ class IngredientNumberSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
     )
+    # number = serializers.ModelField(model_field=IngredientNumber()._meta.get_field('number'))
 
     class Meta:
         model = IngredientNumber
-        fields = ('id', 'name', 'measurement_unit', 'number')
+        fields = ('id', 'name', 'measurement_unit')
         validators = [
             UniqueTogetherValidator(
                 queryset=IngredientNumber.objects.all(),
@@ -131,7 +132,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'image', 'ingredients', 'cooking_time',
                   'is_favorited', 'is_in_shopping_cart')
 
-    image = Base64ImageField()
+    image = Base64ImageField(allow_null=True)
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientNumberSerializer(
