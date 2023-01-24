@@ -32,12 +32,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     serializer_class = RecipeSerializer
-    filterset_fields = ('tags',) 
+    filterset_fields = ('author', 'tags') 
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(detail=True,
@@ -50,13 +47,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
-            if Favorite.objects.filter(user=user,
-                                       recipe=recipe).exists():
-                return Response({'error, this Recipe already added'},
-                                status=status.HTTP_400_BAD_REQUEST)
             serializer = FavoriteSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                serializer.save(user=user, recipe=recipe)
+                instance, created = Favorite.objects.get_or_create(user=user, recipe=recipe)
+                if not created:
+                    serializer.update(instance, serializer.validated_data)
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
@@ -78,13 +73,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(user=user,
-                                           recipe=recipe).exists():
-                return Response({'error, this recipe already added'},
-                                status=status.HTTP_400_BAD_REQUEST)
             serializer = ShoppingCartSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                serializer.save(user=user, recipe=recipe)
+                instance, created = ShoppingCart.objects.get_or_create(user=user, recipe=recipe)
+                if not created:
+                    serializer.update(instance, serializer.validated_data)
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
@@ -119,15 +112,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         shopping_list[name]['number'] + number
                     )
         shopping_list_print = []
-        a = 1
-        for i in shopping_list:
+        for idx, elem in enumerate(shopping_list, start=1):
             shopping_list_print.append(
-                a, '.',
-                i, ' (',
-                shopping_list[i]["measurement_unit"], ') - ',
-                shopping_list[i]["number"], '\n'
+                idx, '.',
+                elem, ' (',
+                shopping_list[i]['measurement_unit'], ') - ',
+                shopping_list[i]['number'], '\n'
             )
-            a += 1
         response = HttpResponse(shopping_list_print, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
         return response
@@ -158,7 +149,7 @@ class FollowViewSet(mixins.CreateModelMixin,
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('=user__username', '=following__username')
+    search_fields = ('=user__username', '=author__username')
 
     def get_queryset(self):
         user = self.request.user

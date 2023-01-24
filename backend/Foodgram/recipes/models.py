@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.core import validators
 
 from users.models import User
 
@@ -8,7 +9,21 @@ from users.models import User
 class Ingredient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200, blank=False)
-    measurement_unit = models.CharField(max_length=10, blank=False)
+    measurement_unit = models.CharField(
+        max_length=10,
+        blank=False,
+        verbose_name='ед.измерения'
+    )
+
+    class Meta:
+        ordering = ['-name']
+        constraints = [models.UniqueConstraint(
+            fields=['name', 'measurement_unit'],
+            name='unique_ingredient')
+        ]
+
+    def __str__(self):
+        return self.name
 
 
 class Tag(models.Model):
@@ -17,11 +32,17 @@ class Tag(models.Model):
     COLOR_CHOICES = (
         ('#0505ff', 'blue'),
         ('#ddff03', 'yellow'),
-        ('#738678', "grey"),
+        ('#738678', 'grey'),
         ('#ff0000', 'red'),
     )
     color = models.TextField(choices=COLOR_CHOICES, unique=True, blank=False, null=True, max_length=7)
     slug = models.SlugField(unique=True, blank=False, null=True, max_length=200)
+
+    class Meta:
+        ordering = ['-name']
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -31,9 +52,23 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='recipes/', null=True, blank=False)
     text = models.TextField(blank=False)
-    ingredients = models.ManyToManyField(Ingredient, blank=False)
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        blank=False,
+        through='IngredientNumber',
+        related_name='recipes'
+    )
     tags = models.ManyToManyField(Tag, blank=False)
-    cooking_time = models.IntegerField(blank=False)
+    cooking_time = models.PositiveIntegerField(
+        blank=False,
+        validators=(
+            validators.MaxValueValidator(3000),
+            validators.MinValueValidator(1),
+        )
+    )
+
+    class Meta:
+        verbose_name = 'Recipe'
 
     def __str__(self):
         return self.name
@@ -45,17 +80,23 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='follower',
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
+        related_name='author'
     )
 
+    
     class Meta:
+        ordering = ('-author_id',)
         constraints = [
-            models.UniqueConstraint(fields=['user', 'following'],
-                                    name='user_following')
+            models.UniqueConstraint(fields=['user', 'author'],
+                                    name='user_author')
         ]
+
+    def __str__(self):
+        return self.author
+
 
 class IngredientNumber(models.Model):
     ingredient = models.ForeignKey(
@@ -68,7 +109,13 @@ class IngredientNumber(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredient_number'
     )
-    number = models.IntegerField(blank=False)
+    number = models.PositiveIntegerField(
+        blank=False,
+        validators=(
+            validators.MaxValueValidator(999),
+            validators.MinValueValidator(1),
+        )
+    )
 
     class Meta:
         constraints = [
@@ -113,3 +160,6 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique_shopping_cart')
         ]
+
+    def __str__(self):
+        return f'Рецепт {self.recipe} в списке покупок у {self.user}'

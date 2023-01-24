@@ -34,7 +34,7 @@ class TagSerializer(serializers.ModelSerializer):
     COLOR_CHOICES = (
         ('#0505ff', 'blue'),
         ('#ddff03', 'yellow'),
-        ('#738678', "grey"),
+        ('#738678', 'grey'),
         ('#ff0000', 'red'),
     )
     color = serializers.ChoiceField(choices=COLOR_CHOICES)
@@ -50,25 +50,25 @@ class FollowSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    following = serializers.SlugRelatedField(
+    author = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all()
     )
 
-    def validate_following(self, following):
-        if self.context['request'].user == following:
+    def validate_following(self, author):
+        if self.context['request'].user == author:
             raise serializers.ValidationError(
-                {'following': 'Нельзя подписаться на самого себя'}
+                {'author': 'Нельзя подписаться на самого себя'}
             )
-        return following
+        return author
 
     class Meta:
-        fields = ('user', 'following')
+        fields = ('user', 'author')
         model = Follow
         validators = [
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
-                fields=['user', 'following']
+                fields=['user', 'author']
             )
         ]
 
@@ -81,7 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         user = request.user
-        return Follow.objects.filter(following=obj, user=user).exists()
+        return Follow.objects.filter(author=obj, user=user).exists()
 
     class Meta:
         model = User
@@ -115,7 +115,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = '__all__'
 
-
+ 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -160,25 +160,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')
-        ingredient = set()
-        for i in ingredients:
-            number = int(i.get('number'))
-            if number <= 0:
+        ingredients_set = set()
+        for ingredient in ingredients:
+            if int(ingredient.get('number')) <= 0:
                 raise serializers.ValidationError(
-                    ('Number of ingredient have to be > 0')
+                    ('Number of Ingredient should be > 0')
                 )
             id = ingredient.get('id')
-            if id in ingredient:
-                raise serializers.ValidationError(
-                    'Ingredient is not unique'
-                )
-            ingredient.add(id)
+            if len(ingredients) > len(set(ingredients)):
+                if id in ingredients_set:
+                    raise serializers.ValidationError(
+                        'Ingredient is already in Recipe'
+                    )
+                ingredients_set.add(id)
         data['ingredients'] = ingredients
         return data
 
     def create(self, validated_data):
         image = validated_data.pop('image')
-        ingredients = validated_data.pop('ingredients')
+        ingredients = self.initial_data.get('ingredients')
         recipe = Recipe.objects.create(image=image, **validated_data)
         tags = self.initial_data.get('tags')
         for tag_id in tags:
@@ -201,7 +201,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag_id in tags:
             instance.tags.add(get_object_or_404(Tag, pk=tag_id))
         IngredientNumber.objects.filter(recipe=instance).delete()
-        for ingredient in validated_data.get('ingredients'):
+        instance.ingredients.clear()
+        instance.ingredients = self.initial_data.get('ingredients')
+        for ingredient in instance.ingredients:
             ingredient_number = IngredientNumber.objects.bulk_create(
                 recipe=instance,
                 ingredient_id=ingredient.get('id'),
