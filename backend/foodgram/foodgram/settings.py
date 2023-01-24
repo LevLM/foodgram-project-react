@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +15,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
@@ -79,10 +78,14 @@ DATABASES = {
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-#         'NAME': os.getenv('DB_NAME', default='postgres'),
-#         'USER': os.getenv('POSTGRES_USER', default='admin'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='ghbdtn11'),
+#         'ENGINE': os.getenv('DB_ENGINE',
+#                               default='django.db.backends.postgresql'),
+#         'NAME': os.getenv('DB_NAME',
+#                           default='postgres'),
+#         'USER': os.getenv('POSTGRES_USER',
+#                           default='admin'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD',
+#                               default='ghbdtn11'),
 #         'HOST': os.getenv('DB_HOST', default='db'),
 #         'PORT': os.getenv('DB_PORT', default='5432')
 #     }
@@ -93,16 +96,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 

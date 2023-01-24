@@ -2,7 +2,6 @@ import uuid
 
 from django.core import validators
 from django.db import models
-
 from users.models import User
 
 
@@ -35,8 +34,13 @@ class Tag(models.Model):
         ('#738678', 'grey'),
         ('#ff0000', 'red'),
     )
-    color = models.TextField(choices=COLOR_CHOICES, unique=True, blank=False, null=True, max_length=7)
-    slug = models.SlugField(unique=True, blank=False, null=True, max_length=200)
+    color = models.TextField(
+        choices=COLOR_CHOICES, unique=True,
+        blank=False, null=True, max_length=7
+    )
+    slug = models.SlugField(
+        unique=True, blank=False, null=True, max_length=200
+    )
 
     class Meta:
         ordering = ['-name']
@@ -86,7 +90,6 @@ class Follow(models.Model):
         related_name='following'
     )
 
-    
     class Meta:
         # ordering = ('-author_id',)
         constraints = [

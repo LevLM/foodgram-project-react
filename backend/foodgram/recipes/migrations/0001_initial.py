@@ -20,13 +20,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Favorite',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='Follow',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
@@ -34,7 +36,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
-                ('measurement_unit', models.CharField(max_length=10, verbose_name='ед.измерения')),
+                ('measurement_unit', models.CharField(max_length=10,
+                verbose_name='ед.измерения')),
             ],
             options={
                 'ordering': ['-name'],
@@ -43,9 +46,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='IngredientNumber',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.PositiveIntegerField(validators=[django.core.validators.MaxValueValidator(999), django.core.validators.MinValueValidator(1)])),
-                ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ingredient_number', to='recipes.ingredient')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                serialize=False, verbose_name='ID')),
+                ('number', models.PositiveIntegerField(validators=[
+                    django.core.validators.MaxValueValidator(999), django.core.validators.MinValueValidator(1)])),
+                ('ingredient', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='ingredient_number', to='recipes.ingredient')),
             ],
         ),
         migrations.CreateModel(
@@ -55,9 +62,14 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=200)),
                 ('image', models.ImageField(null=True, upload_to='recipes/')),
                 ('text', models.TextField()),
-                ('cooking_time', models.PositiveIntegerField(validators=[django.core.validators.MaxValueValidator(3000), django.core.validators.MinValueValidator(1)])),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL)),
-                ('ingredients', models.ManyToManyField(related_name='recipes', through='recipes.IngredientNumber', to='recipes.Ingredient')),
+                ('cooking_time', models.PositiveIntegerField(validators=[
+                    django.core.validators.MaxValueValidator(3000),
+                    django.core.validators.MinValueValidator(1)])),
+                ('author', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='recipes', to=settings.AUTH_USER_MODEL)),
+                ('ingredients', models.ManyToManyField(related_name='recipes',
+                through='recipes.IngredientNumber', to='recipes.Ingredient')),
             ],
             options={
                 'verbose_name': 'Recipe',
@@ -68,8 +80,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.IntegerField(primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200, unique=True)),
-                ('color', models.TextField(choices=[('#0505ff', 'blue'), ('#ddff03', 'yellow'), ('#738678', 'grey'), ('#ff0000', 'red')], max_length=7, null=True, unique=True)),
-                ('slug', models.SlugField(max_length=200, null=True, unique=True)),
+                ('color', models.TextField(choices=[('#0505ff', 'blue'), (
+                    '#ddff03', 'yellow'), ('#738678', 'grey'),
+                    ('#ff0000', 'red')], max_length=7, null=True, unique=True)),
+                ('slug', models.SlugField(max_length=200,
+                    null=True, unique=True)),
             ],
             options={
                 'ordering': ['-name'],
@@ -79,8 +94,12 @@ class Migration(migrations.Migration):
             name='ShoppingCart',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to='recipes.recipe')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to=settings.AUTH_USER_MODEL)),
+                ('recipe', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='shopping_cart', to='recipes.recipe')),
+                ('user', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='shopping_cart', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
@@ -91,7 +110,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ingredientnumber',
             name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ingredient_number', to='recipes.recipe'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='ingredient_number', to='recipes.recipe'),
         ),
         migrations.AddConstraint(
             model_name='ingredient',

@@ -3,11 +3,10 @@ import uuid
 
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
                             Recipe, ShoppingCart, Tag)
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
 
 
@@ -97,7 +96,8 @@ class IngredientNumberSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
     )
-    # number = serializers.ModelField(model_field=IngredientNumber()._meta.get_field('number'))
+    # number = serializers.ModelField(
+    # model_field=IngredientNumber()._meta.get_field('number'))
 
     class Meta:
         model = IngredientNumber
@@ -111,21 +111,21 @@ class IngredientNumberSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Favorite
         fields = '__all__'
 
- 
+
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = ShoppingCart
         fields = '__all__'
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'name', 'text',

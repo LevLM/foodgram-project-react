@@ -1,17 +1,16 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
+                            Recipe, ShoppingCart, Tag)
 from rest_framework import filters, mixins, permissions, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
-                            Recipe, ShoppingCart, Tag)
 from users.models import User
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
@@ -21,8 +20,8 @@ from .serializers import (FavoriteSerializer, FollowSerializer,
 
 
 class CreateListDestroyViewSet(
-    CreateModelMixin, DestroyModelMixin,
-    ListModelMixin, RetrieveModelMixin, GenericViewSet):
+        CreateModelMixin, DestroyModelMixin,
+        ListModelMixin, RetrieveModelMixin, GenericViewSet):
     pass
 
 
@@ -32,24 +31,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     serializer_class = RecipeSerializer
-    filterset_fields = ('author', 'tags') 
+    filterset_fields = ('author', 'tags')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated, ],
-        filter_backends = (DjangoFilterBackend,),
-        filterset_fields = ('tags',) 
-    )
+            methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated, ],
+            filter_backends=(DjangoFilterBackend,),
+            filterset_fields=('tags',))
     def favorite(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
             serializer = FavoriteSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                instance, created = Favorite.objects.get_or_create(user=user, recipe=recipe)
+                instance, created = Favorite.objects.get_or_create(
+                    user=user, recipe=recipe)
                 if not created:
                     serializer.update(instance, serializer.validated_data)
                 return Response(serializer.data,
@@ -64,18 +63,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('Recipe deleted from Favorite',
                         status=status.HTTP_204_NO_CONTENT)
 
-
     @action(detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated, ]
-    )
+            methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated, ]
+            )
     def shopping_cart(self, request, **kwargs):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
             serializer = ShoppingCartSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                instance, created = ShoppingCart.objects.get_or_create(user=user, recipe=recipe)
+                instance, created = ShoppingCart.objects.get_or_create(
+                    user=user, recipe=recipe)
                 if not created:
                     serializer.update(instance, serializer.validated_data)
                 return Response(serializer.data,
@@ -119,7 +118,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 shopping_list[i]['measurement_unit'], ') - ',
                 shopping_list[i]['number'], '\n'
             )
-        response = HttpResponse(shopping_list_print, 'Content-Type: text/plain')
+        response = HttpResponse(shopping_list_print,
+                                'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
         return response
 
@@ -157,6 +157,7 @@ class FollowViewSet(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
