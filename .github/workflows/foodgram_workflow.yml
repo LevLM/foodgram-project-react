@@ -46,7 +46,7 @@ jobs:
         with:
           push: true
           tags: levlm/foodgram
-          context: ./foodgram/
+          context: ../foodgram/
 
   # deploy:
   #   runs-on: ubuntu-latest
