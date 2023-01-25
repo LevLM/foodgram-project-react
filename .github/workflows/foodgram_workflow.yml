@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: levlm/foodgram
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram
           context: ./backend/
 
   # deploy:
