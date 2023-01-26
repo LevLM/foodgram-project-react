@@ -47,39 +47,47 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram
           context: ./backend/foodgram
-          # file: ./backend/foodgram/Dockerfile
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build_and_push_to_docker_hub
-  #   steps:
-  #     - name: executing remote ssh commands to deploy
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.HOST }}
-  #         username: ${{ secrets.USER }}
-  #         key: ${{ secrets.SSH_KEY }}
-  #         passphrase: ${{ secrets.PASSPHRASE }}
-  #         script: |
-  #           sudo docker pull levlm/api_yamdb:latest
-  #           sudo docker compose stop
-  #           sudo docker compose rm web
-  #           touch .env
-  #           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
-  #           echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-  #           echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-  #           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-  #           echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-  #           echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-  #           sudo docker compose up -d
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    steps:
+      - name: executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          # port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            cd foodgram_infra
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram
+            sudo docker compose stop
+            sudo docker compose rm web
+            touch .env
+            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            sudo docker compose up -d
 
-  # send_message:
-  #   runs-on: ubuntu-latest
-  #   needs: deploy
-  #   steps:
-  #   - name: send message
-  #     uses: appleboy/telegram-action@master
-  #     with:
-  #       to: ${{ secrets.TELEGRAM_TO }}
-  #       token: ${{ secrets.TELEGRAM_TOKEN }}
-  #       message: ${{ github.workflow }} успешно выполнен!
+
+          # script: |
+          #   cd foodgram_infra
+          #   sudo docker-compose down
+          #   echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
+          #   echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+          #   echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+          #   echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+          #   echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+          #   echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+          #   echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+          #   echo DEBUG=${{ secrets.DEBUG }} >> .env
+          #   echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
+          #   echo USE_SQLITE=${{ secrets.USE_SQLITE }} >> .env
+          #   sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram
+          #   sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram
+          #   sudo docker-compose up -d
