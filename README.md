@@ -1,5 +1,5 @@
-# Черновик Readme
-# praktikum_new_diplom!
+# Черновик Readme!
+# praktikum_new_diplom
 # Проект Foodgram
 
 Проект Foodgram собирает отзывы пользователей на различные произведения такие как
