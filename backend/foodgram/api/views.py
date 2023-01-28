@@ -14,9 +14,9 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer, ShoppingCartSerializer,
-                          TagSerializer, UserSerializer)
+                          IngredientSerializer, RecipeSerializer,
+                          ShoppingCartSerializer, TagSerializer,
+                          UserSerializer)
 
 
 class CreateListDestroyViewSet(
