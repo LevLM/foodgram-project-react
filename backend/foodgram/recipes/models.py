@@ -60,7 +60,7 @@ class Recipe(models.Model):
         Ingredient,
         blank=False,
         through='IngredientNumber',
-        related_name='recipes'
+        # related_name='recipes'
     )
     tags = models.ManyToManyField(Tag, blank=False)
     cooking_time = models.PositiveIntegerField(
@@ -120,11 +120,11 @@ class IngredientNumber(models.Model):
         )
     )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['ingredient', 'recipe'],
-                                    name='ingredient_number')
-        ]
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=['ingredient', 'recipe'],
+    #                                 name='ingredient_number')
+    #     ]
 
 
 class Favorite(models.Model):

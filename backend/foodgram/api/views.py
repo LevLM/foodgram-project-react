@@ -14,7 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientNumberSerializer, IngredientSerializer,
+                          IngredientSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, UserSerializer)
 
@@ -129,11 +129,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     search_fields = ('^name',)
-
-
-class RecipeIngredientViewSet(viewsets.ModelViewSet):
-    queryset = IngredientNumber.objects.all()
-    serializer_class = IngredientNumberSerializer
 
 
 class TagViewSet(CreateListDestroyViewSet):

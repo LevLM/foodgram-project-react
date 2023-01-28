@@ -80,7 +80,7 @@ class UserSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         user = request.user
-        return Follow.objects.filter(author=obj, user=user).exists()
+        return Follow.objects.filter(following=obj, user=user).exists()
 
     class Meta:
         model = User
@@ -96,18 +96,17 @@ class IngredientNumberSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
     )
-    # number = serializers.ModelField(
-    # model_field=IngredientNumber()._meta.get_field('number'))
+    amount = serializers.IntegerField(source='number')
 
     class Meta:
         model = IngredientNumber
-        fields = ('id', 'name', 'measurement_unit')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=IngredientNumber.objects.all(),
-                fields=['ingredient', 'recipe']
-            )
-        ]
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=IngredientNumber.objects.all(),
+        #         fields=['ingredient', 'recipe']
+        #     )
+        # ]
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -136,7 +135,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientNumberSerializer(
-        many=True, read_only=True,
+        source='ingredient_number',
+        many=True,
+        read_only=True,
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
