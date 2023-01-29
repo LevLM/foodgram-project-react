@@ -158,7 +158,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
-    lookup_field = 'username'
 
     @action(
         detail=False,

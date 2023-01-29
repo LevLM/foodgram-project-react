@@ -54,13 +54,14 @@ class Recipe(models.Model):
         User, on_delete=models.CASCADE, related_name='recipes', blank=False)
     name = models.CharField(max_length=200, blank=False)
     image = models.ImageField(
-        upload_to='recipes/', null=True, blank=False)
+        upload_to='recipes/', null=True,
+        blank=False
+    )
     text = models.TextField(blank=False)
     ingredients = models.ManyToManyField(
         Ingredient,
         blank=False,
         through='IngredientNumber',
-        # related_name='recipes'
     )
     tags = models.ManyToManyField(Tag, blank=False)
     cooking_time = models.PositiveIntegerField(
@@ -166,3 +167,11 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f'Рецепт {self.recipe} в списке покупок у {self.user}'
+
+
+class TagRecipe(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.tag} {self.recipe}'
