@@ -2,9 +2,9 @@ import base64
 import uuid
 
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
-                            Recipe, ShoppingCart, Tag, TagRecipe)
+                            Recipe, ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import User

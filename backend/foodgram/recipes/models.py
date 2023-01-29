@@ -169,9 +169,9 @@ class ShoppingCart(models.Model):
         return f'Рецепт {self.recipe} в списке покупок у {self.user}'
 
 
-class TagRecipe(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+# class TagRecipe(models.Model):
+#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f'{self.tag} {self.recipe}'
+#     def __str__(self):
+#         return f'{self.tag} {self.recipe}'
