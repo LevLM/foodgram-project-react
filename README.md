@@ -1,4 +1,4 @@
-# Черновик Readme!
+# Черновик Readme
 # praktikum_new_diplom
 # Проект Foodgram
 
