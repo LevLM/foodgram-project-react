@@ -1,4 +1,4 @@
-import uuid
+# import uuid
 
 from django.core import validators
 from django.db import models
@@ -6,7 +6,7 @@ from users.models import User
 
 
 class Ingredient(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200, blank=False)
     measurement_unit = models.CharField(
         max_length=10,
@@ -121,11 +121,11 @@ class IngredientNumber(models.Model):
         )
     )
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(fields=['ingredient', 'recipe'],
-    #                                 name='ingredient_number')
-    #     ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['ingredient', 'recipe'],
+                                    name='ingredient_number')
+        ]
 
 
 class Favorite(models.Model):

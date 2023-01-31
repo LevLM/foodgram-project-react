@@ -91,7 +91,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class IngredientNumberSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='ingredient.id')
+    # id = serializers.ReadOnlyField(source='ingredient.id')
+    id = serializers.SlugRelatedField(
+        source='ingredient',
+        slug_field='id',
+        queryset=Ingredient.objects.all()
+    )
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
@@ -128,8 +133,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         allow_null=True
     )
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True)
+    author = UserSerializer(read_only=True, required=False)
+    # tags = TagSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     ingredients = IngredientNumberSerializer(
         source='ingredient_number',
         many=True
@@ -158,7 +166,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     # def validate(self, data):
     #     ingredients = data['ingredient_number']
     #     if len(ingredients) != len(
-    #         set(obj['ingredient'] for obj in ingredients)
+    #         set(obj['ingredients'] for obj in ingredients)
     #     ):
     #         raise serializers.ValidationError(
     #             'Ingredients should be unique')
@@ -184,54 +192,29 @@ class RecipeSerializer(serializers.ModelSerializer):
         # data['ingredients'] = ingredients
         # return data
 
-    # def create(self, validated_data):
-    #     image = validated_data.pop('image')
-    #     # ingredients = self.initial_data.get('ingredients')
-    #     recipe = Recipe.objects.create(image=image, **validated_data)
-    #     # # tagsdata = validated_data.tags.get_queryset()
-    #     # tags = self.initial_data.get('tags')
-    #     # # tags = []
-    #     # # for i in tagsdata:
-    #     # #     tags.append(i)
-    #     # for tag_id in tags:
-    #     #     recipe.tags.add(get_object_or_404(Tag, pk=tag_id))
-    #     # for ingredient in ingredients:
-    #     #     IngredientNumber.objects.bulk_create(
-    #     #         recipe=recipe,
-    #     #         ingredient_id=ingredient.get('id'),
-    #     #         number=ingredient.get('number')
-    #     #     )
-    #     return recipe
+    # def create_ingredients(self, ingredients, recipe):
+    #     for ingredient in ingredients:
+    #         IngredientNumber.objects.create(
+    #             recipe=recipe,
+    #             number=ingredient['number'],
+    #             ingredient=ingredient
+    #         )
 
-    # def create(self, validated_data):
-    #     # ingredients = validated_data.pop('ingredient_number')
-    #     tags = validated_data.pop('tags')
-    #     recipe = Recipe.objects.create(**validated_data)
-    #     # for ingredient in ingredients:
-    #        curr_ingredient, status = IngredientNumber.objects.get_or_create(
-    #     #         **ingredient)
-    #     #     IngredientNumber.objects.create(
-    #     #         ingredient=curr_ingredient, recipe=recipe)
-    #     for tag in tags:
-    #         current_tag, status = Tag.objects.get_or_create(
-    #             **tag)
-    #         TagRecipe.objects.create(
-    #             tag=current_tag, recipe=recipe)
-    #     return recipe
+    def create_ingredients(self, ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientNumber.objects.create(
+                recipe=recipe,
+                number=ingredient.get('number'),
+                ingredient=ingredient.get('id')
+            )
 
     def create(self, validated_data):
-        author = self.context.get('request').user
-        ingredients = validated_data.pop('ingredients')
+        # request = self.context.get('request')
+        ingredients = validated_data.pop('ingredient_number')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data, author=author)
-        for tag in tags:
-            # current_tag, status = Tag.objects.get_or_create(
-            #     **tag)
-            current_tag = Tag.objects.get_or_create(tag)
-            recipe.tags.add(current_tag)
-            # TagRecipe.objects.create(
-            #     tag=current_tag, recipe=recipe)
-        self.save_ingredients(recipe, ingredients)
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.create_ingredients(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
