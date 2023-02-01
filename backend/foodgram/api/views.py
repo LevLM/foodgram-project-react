@@ -16,9 +16,9 @@ from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer, ShoppingCartSerializer,
-                          TagSerializer, UserRecipeSerializer)
+                          IngredientSerializer, RecipeSerializer,
+                          ShoppingCartSerializer, TagSerializer,
+                          UserRecipeSerializer)
 
 
 class CreateListDestroyViewSet(
