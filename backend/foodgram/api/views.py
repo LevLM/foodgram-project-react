@@ -1,4 +1,4 @@
-from django.db.models.query_utils import Q
+# from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
