@@ -179,6 +179,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
+    def to_representation(self, instance):
+        return RecipeListSerializer(instance, context=self.context).data
+
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:

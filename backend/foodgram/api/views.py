@@ -4,12 +4,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
                             Recipe, ShoppingCart, Tag)
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
