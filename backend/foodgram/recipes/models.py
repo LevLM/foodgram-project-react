@@ -1,12 +1,9 @@
-# import uuid
-
 from django.core import validators
 from django.db import models
 from users.models import User
 
 
 class Ingredient(models.Model):
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200, blank=False)
     measurement_unit = models.CharField(
         max_length=10,
@@ -79,23 +76,31 @@ class Recipe(models.Model):
         return self.name
 
 
-class Follow(models.Model):
+class UserFollow(models.Model):
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-    )
-    following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='following'
     )
 
     class Meta:
+        abstract = True
+
+
+class Follow(UserFollow):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+    )
+
+    class Meta:
         # ordering = ('-author_id',)
         constraints = [
-            models.UniqueConstraint(fields=['user', 'following'],
-                                    name='user_following')
+            models.UniqueConstraint(
+                name='unique_follow',
+                fields=['user', 'author'],
+            ),
         ]
 
     def __str__(self):
@@ -167,11 +172,3 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f'Рецепт {self.recipe} в списке покупок у {self.user}'
-
-
-# class TagRecipe(models.Model):
-#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-#     def __str__(self):
-#         return f'{self.tag} {self.recipe}'

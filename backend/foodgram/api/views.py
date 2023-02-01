@@ -1,9 +1,10 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser import views
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
                             Recipe, ShoppingCart, Tag)
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
@@ -16,13 +17,21 @@ from users.models import User
 from .serializers import (FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer,
-                          UserSerializer)
+                          UserRecipeSerializer)
 
 
 class CreateListDestroyViewSet(
         CreateModelMixin, DestroyModelMixin,
         ListModelMixin, RetrieveModelMixin, GenericViewSet):
     pass
+
+
+class TokenCreateView(views.TokenCreateView):
+    def _action(self, serializer):
+        response = super()._action(serializer)
+        if response.status_code == status.HTTP_200_OK:
+            response.status_code = status.HTTP_201_CREATED
+        return response
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -137,40 +146,55 @@ class TagViewSet(CreateListDestroyViewSet):
     permission_classes = (AllowAny,)
 
 
-class FollowViewSet(mixins.CreateModelMixin,
-                    mixins.ListModelMixin,
-                    viewsets.GenericViewSet
-                    ):
-    queryset = Follow.objects.all()
-    serializer_class = FollowSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=user__username', '=following__username')
+class UserRecipeViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = UserRecipeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_author(self) -> User:
+        return get_object_or_404(User, id=self.kwargs.get('author_id'))
+
+    def get_object(self):
+        return get_object_or_404(
+            Follow, user=self.request.user, author=self.get_author()
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        self.get_author()
+        try:
+            self.get_object()
+        except Http404:
+            data = {'errors': 'Нельзя отменить подписку, если не был подписан'}
+            return JsonResponse(data, status=status.HTTP_400_BAD_REQUEST)
+        return super().destroy(request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action in (
+            'create',
+            'destroy',
+        ):
+            return FollowSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self):
-        user = self.request.user
-        return user.follower.all()
+        if self.request.user.is_authenticated:
+            return User.objects.filter(follower__user=self.request.user)
+        return None
+
+    def create(self, request, *args, **kwargs):
+        request.data.update(author=self.get_author())
+        super().create(request, *args, **kwargs)
+        serializer = self.serializer_class(
+            instance=self.get_author(), context=self.get_serializer_context()
+        )
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = UserSerializer
-
-    @action(
-        detail=False,
-        methods=(['GET', 'PATCH']),
-        permission_classes=[IsAuthenticated],
-    )
-    def me(self, request):
-        if request.method == 'GET':
-            serializer = UserSerializer(request.user)
-            return Response(serializer.data)
-        serializer = UserSerializer(
-            request.user, data=request.data, partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(role=request.user.role)
-        return Response(serializer.data)
+        serializer.save(author=self.get_author())
