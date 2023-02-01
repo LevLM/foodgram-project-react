@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -138,10 +139,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    search_fields = ('^name',)
+# class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Ingredient.objects.all()
+#     serializer_class = IngredientSerializer
+#     search_fields = ('^name',)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -151,21 +152,19 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
         return Tag.objects.all()
 
 
-# class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = IngredientSerializer
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = IngredientSerializer
 
-#     def get_queryset(self):
-#         queryset = Ingredient.objects.all()
-#         name = self.request.query_params.get('name')
-#         if name is not None:
-#             qs_starts = queryset.filter(name__istartswith=name)
-#             qs_contains = queryset.filter(
-#                 ~Q(name__istartswith=name) & Q(name__icontains=name)
-#             )
-#             # преобразуем в list, чтобы результирующий queryset
-#             # имел первоначальную сортировку
-#             queryset = list(qs_starts) + list(qs_contains)
-#         return queryset
+    def get_queryset(self):
+        queryset = Ingredient.objects.all()
+        name = self.request.query_params.get('name')
+        if name is not None:
+            qs_starts = queryset.filter(name__istartswith=name)
+            qs_contains = queryset.filter(
+                ~Q(name__istartswith=name) & Q(name__icontains=name)
+            )
+            queryset = list(qs_starts) + list(qs_contains)
+        return queryset
 
 
 class UserRecipeViewSet(

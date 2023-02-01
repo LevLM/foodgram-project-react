@@ -161,14 +161,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart',
+        fields = ('tags', 'ingredients',
                   'name', 'image', 'text', 'cooking_time')
 
     image = Base64ImageField(
         allow_null=True
     )
-    author = UserSerializer(read_only=True, required=False)
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all()
     )
@@ -176,29 +174,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='ingredient_number',
         many=True
     )
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
 
     def to_representation(self, instance):
         return RecipeListSerializer(instance, context=self.context).data
-
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Favorite.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
 
     def validate(self, data):
         if len(data['tags']) == 0:
