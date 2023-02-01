@@ -43,9 +43,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class RecipeMiniOutputSerializer(serializers.ModelSerializer):
-    image = Base64ImageField(
-        # max_length=None,
-        use_url=True)
+    image = Base64ImageField(use_url=True)
 
     class Meta:
         model = Recipe
@@ -252,3 +250,34 @@ class RecipeSerializer(serializers.ModelSerializer):
                 self, ingredient_number, recipe
             )
         return super().update(recipe, validated_data)
+
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    author = UserSerializer(
+        default=serializers.CurrentUserDefault(), read_only=True
+    )
+    image = Base64ImageField(use_url=True)
+    ingredients = IngredientNumberSerializer(
+        source='ingredientnumber', many=True
+    )
+    tags = TagSerializer(many=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+
+    def get_is_favorited(self, recipe):
+        request = self.context['request']
+        return (
+            request.user.is_authenticated
+            and recipe.favoriterecipe_set.filter(user=request.user).exists()
+        )
+
+    def get_is_in_shopping_cart(self, recipe):
+        request = self.context['request']
+        return (
+            request.user.is_authenticated
+            and recipe.shoppingcartrecipe_set.filter(
+                user=request.user).exists()
+        )

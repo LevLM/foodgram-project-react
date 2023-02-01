@@ -13,11 +13,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
+from users.permissions import IsAuthorOrReadOnly
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          ShoppingCartSerializer, TagSerializer,
-                          UserRecipeSerializer)
+                          IngredientSerializer, RecipeListSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
+                          TagSerializer, UserRecipeSerializer)
 
 
 class CreateListDestroyViewSet(
@@ -36,12 +37,13 @@ class TokenCreateView(views.TokenCreateView):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeListSerializer
     filterset_fields = ('author', 'tags')
 
+    @action(serializer_class=RecipeSerializer)
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -76,7 +78,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated, ]
             )
-    def shopping_cart(self, request, **kwargs):
+    def shopping_cart(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
         if request.method == 'POST':
