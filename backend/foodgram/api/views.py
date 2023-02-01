@@ -43,7 +43,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeListSerializer
     filterset_fields = ('author', 'tags')
 
-    @action(serializer_class=RecipeSerializer)
+    @action(detail=True,
+            serializer_class=RecipeSerializer)
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
