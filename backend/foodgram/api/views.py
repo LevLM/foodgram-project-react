@@ -16,7 +16,7 @@ from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeListSerializer,
+                          IngredientSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, UserRecipeSerializer)
 
@@ -40,11 +40,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    serializer_class = RecipeListSerializer
+    serializer_class = RecipeSerializer
     filterset_fields = ('author', 'tags')
 
-    @action(detail=True,
-            serializer_class=RecipeSerializer)
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
