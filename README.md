@@ -32,7 +32,7 @@ http://158.160.43.47/
 http://158.160.43.47/api/docs/
 ```
 
-### [Образ на DockerHub]
+### Образ на DockerHub
 
 ```
 https://hub.docker.com/repository/docker/levlm/foodgram

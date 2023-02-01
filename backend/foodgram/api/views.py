@@ -141,14 +141,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     search_fields = ('^name',)
 
 
-class TagViewSet(CreateListDestroyViewSet):
-    queryset = Tag.objects.all()
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
-    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        return Tag.objects.all()
+
+
+# class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+#     serializer_class = IngredientSerializer
+
+#     def get_queryset(self):
+#         queryset = Ingredient.objects.all()
+#         name = self.request.query_params.get('name')
+#         if name is not None:
+#             qs_starts = queryset.filter(name__istartswith=name)
+#             qs_contains = queryset.filter(
+#                 ~Q(name__istartswith=name) & Q(name__icontains=name)
+#             )
+#             # преобразуем в list, чтобы результирующий queryset
+#             # имел первоначальную сортировку
+#             queryset = list(qs_starts) + list(qs_contains)
+#         return queryset
 
 
 class UserRecipeViewSet(
