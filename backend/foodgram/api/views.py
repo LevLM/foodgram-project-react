@@ -9,16 +9,16 @@ from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
 from .serializers import (FavoriteSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          ShoppingCartSerializer, TagSerializer,
-                          UserRecipeSerializer)
+                          IngredientSerializer, RecipeListSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
+                          TagSerializer, UserRecipeSerializer)
 
 
 class CreateListDestroyViewSet(
@@ -40,8 +40,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    serializer_class = RecipeSerializer
     filterset_fields = ('author', 'tags')
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return RecipeSerializer
+        return RecipeListSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
