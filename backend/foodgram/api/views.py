@@ -37,7 +37,7 @@ class TokenCreateView(views.TokenCreateView):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly, )
+    edit_permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     filterset_fields = ('author', 'tags')
@@ -163,21 +163,6 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Tag.objects.all()
-
-
-# class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = IngredientSerializer
-
-#     def get_queryset(self):
-#         queryset = Ingredient.objects.all()
-#         name = self.request.query_params.get('name')
-#         if name is not None:
-#             qs_starts = queryset.filter(name__istartswith=name)
-#             qs_contains = queryset.filter(
-#                 ~Q(name__istartswith=name) & Q(name__icontains=name)
-#             )
-#             queryset = list(qs_starts) + list(qs_contains)
-#         return queryset
 
 
 class UserRecipeViewSet(
