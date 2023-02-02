@@ -66,7 +66,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True,
             methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated, ],
+            permission_classes=[IsAuthenticated, ]
             # filter_backends=(DjangoFilterBackend,),
             # filterset_fields=('tags',)
             )
