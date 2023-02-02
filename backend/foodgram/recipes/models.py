@@ -150,6 +150,9 @@ class Favorite(models.Model):
                                     name='unique_favorite')
         ]
 
+    def __str__(self):
+        return f'Рецепт {self.recipe} в списке Избранное у {self.user}'
+
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
