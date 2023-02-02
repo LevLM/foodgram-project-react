@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -64,11 +65,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        user = self.request.user
+        is_favorited = self.request.query_params.get("is_favorited")
+        if is_favorited:
+            recipes_id = (
+                Favorite.objects.filter(user=user).values("recipe__id")
+                if user.is_authenticated
+                else []
+            )
+            condition = Q(id__in=recipes_id)
+            queryset = queryset.filter(
+                condition if is_favorited == "1" else ~condition
+            ).all()
+        is_in_shopping_cart = self.request.query_params.get(
+            "is_in_shopping_cart")
+        if is_in_shopping_cart:
+            recipes_id = (
+                ShoppingCart.objects.filter(user=user).values("recipe__id")
+                if user.is_authenticated
+                else []
+            )
+            condition = Q(id__in=recipes_id)
+            queryset = queryset.filter(
+                condition if is_in_shopping_cart == "1" else ~condition
+            ).all()
+        author_id = self.request.query_params.get("author")
+        if author_id:
+            queryset = queryset.filter(author__id=author_id).all()
+        return queryset
+
     @action(detail=True,
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated, ]
-            # filter_backends=(DjangoFilterBackend,),
-            # filterset_fields=('tags',)
             )
     def favorite(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
@@ -157,10 +187,12 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     search_fields = ('^name',)
+    pagination_class = None
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Tag.objects.all()
