@@ -57,7 +57,6 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          # port: ${{ secrets.PORT }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
@@ -74,21 +73,3 @@ jobs:
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             sudo docker compose up -d
-
-
-          # script: |
-          #   cd foodgram_infra
-          #   sudo docker-compose down
-          #   echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
-          #   echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-          #   echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-          #   echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-          #   echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-          #   echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-          #   echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
-          #   echo DEBUG=${{ secrets.DEBUG }} >> .env
-          #   echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
-          #   echo USE_SQLITE=${{ secrets.USE_SQLITE }} >> .env
-          #   sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram
-          #   sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram
-          #   sudo docker-compose up -d

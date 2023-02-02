@@ -50,8 +50,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in (
-            "destroy",
-            "partial_update",
+            'destroy',
+            'partial_update',
         ):
             return [
                 permission() for permission in self.edit_permission_classes]
@@ -59,8 +59,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in (
-            "create",
-            "partial_update",
+            'create',
+            'partial_update',
         ):
             return self.edit_serializer_class
         return super().get_serializer_class()
@@ -71,30 +71,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Recipe.objects.all()
         user = self.request.user
-        is_favorited = self.request.query_params.get("is_favorited")
+        is_favorited = self.request.query_params.get('is_favorited')
         if is_favorited:
             recipes_id = (
-                Favorite.objects.filter(user=user).values("recipe__id")
+                Favorite.objects.filter(user=user).values('recipe__id')
                 if user.is_authenticated
                 else []
             )
             condition = Q(id__in=recipes_id)
             queryset = queryset.filter(
-                condition if is_favorited == "1" else ~condition
+                condition if is_favorited == '1' else ~condition
             ).all()
         is_in_shopping_cart = self.request.query_params.get(
-            "is_in_shopping_cart")
+            'is_in_shopping_cart')
         if is_in_shopping_cart:
             recipes_id = (
-                ShoppingCart.objects.filter(user=user).values("recipe__id")
+                ShoppingCart.objects.filter(user=user).values('recipe__id')
                 if user.is_authenticated
                 else []
             )
             condition = Q(id__in=recipes_id)
             queryset = queryset.filter(
-                condition if is_in_shopping_cart == "1" else ~condition
+                condition if is_in_shopping_cart == '1' else ~condition
             ).all()
-        author_id = self.request.query_params.get("author")
+        author_id = self.request.query_params.get('author')
         if author_id:
             return (queryset.filter(author__id=author_id).all())
         return queryset
@@ -157,20 +157,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
             IngredientNumber.objects.filter(
                 recipe__shopping_cart__user=request.user
             )
-            .values("ingredient__name", "ingredient__measurement_unit")
-            .annotate(Sum("number"))
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(Sum('number'))
         )
         user = request.user
         data = {
-            "page_objects": queryset,
-            "user": user,
+            'page_objects': queryset,
+            'user': user,
         }
-        template = get_template("shopping_cart.html")
+        template = get_template('shopping_cart.html')
         html = template.render(data)
         shopping_list_print = pdfkit.from_string(
-            html, False, options={"encoding": "UTF-8"})
+            html, False, options={'encoding': 'UTF-8'})
         response = HttpResponse(shopping_list_print,
-                                'content_type="application/pdf')
+                                'content_type=application/pdf')
         response['Content-Disposition'] = 'attachment; filename="shoplist.pdf"'
         return response
 
