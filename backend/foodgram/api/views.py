@@ -94,7 +94,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         author_id = self.request.query_params.get("author")
         if author_id:
             queryset = queryset.filter(author__id=author_id).all()
-        return queryset
 
     @action(detail=True,
             methods=['post', 'delete'],
