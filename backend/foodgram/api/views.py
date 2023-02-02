@@ -67,8 +67,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True,
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated, ],
-            filter_backends=(DjangoFilterBackend,),
-            filterset_fields=('tags',))
+            # filter_backends=(DjangoFilterBackend,),
+            # filterset_fields=('tags',)
+            )
     def favorite(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = self.request.user
