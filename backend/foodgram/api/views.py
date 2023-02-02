@@ -1,6 +1,9 @@
+import pdfkit
+from django.db.models import Sum
 from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
@@ -148,38 +151,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('Recipe deleted from ShoppingCart',
                         status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, permission_classes=[IsAuthenticated])
+    @action(detail=False, permission_classes=[IsAuthenticated, ])
     def download_shopping_cart(self, request):
-        user = request.user
-        shopping_cart = user.shopping_cart.all()
-        shopping_list = {}
-        for i in shopping_cart:
-            recipe = i.recipe
-            ingredients = IngredientNumber.objects.filter(recipe=recipe)
-            for ingredient in ingredients:
-                number = ingredient.number
-                name = ingredient.ingredient.name
-                measurement_unit = ingredient.ingredient.measurement_unit
-                if name not in shopping_list:
-                    shopping_list[name] = {
-                        'measurement_unit': measurement_unit,
-                        'number': number
-                    }
-                else:
-                    shopping_list[name]['number'] = (
-                        shopping_list[name]['number'] + number
-                    )
-        shopping_list_print = []
-        for idx, elem in enumerate(shopping_list, start=1):
-            shopping_list_print.append(
-                idx, '.',
-                elem, ' (',
-                shopping_list[i]['measurement_unit'], ') - ',
-                shopping_list[i]['number'], '\n'
+        queryset = (
+            IngredientNumber.objects.filter(
+                recipe__shopping_cart__user=request.user
             )
+            .values("ingredient__name", "ingredient__measurement_unit")
+            .annotate(Sum("number"))
+        )
+        user = request.user
+        data = {
+            "page_objects": queryset,
+            "user": user,
+        }
+        template = get_template("shopping_cart.html")
+        html = template.render(data)
+        shopping_list_print = pdfkit.from_string(
+            html, False, options={"encoding": "UTF-8"})
         response = HttpResponse(shopping_list_print,
-                                'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
+                                'content_type="application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="shoplist.pdf"'
         return response
 
 

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <body>
+        <h1>Список покупок</h1>
+        <table>
+            <tr>
+                <th>Ингредиент</th>
+                <th>Количество</th>
+            </tr>
+            {% for obj in page_objects %}
+                <tr>
+                    <td>{{ obj.ingredient__name }} ({{ obj.ingredient__measurement_unit }})</td>
+                    <th>{{ obj.number__sum }}</th>
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>

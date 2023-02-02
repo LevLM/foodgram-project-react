@@ -171,6 +171,3 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique_shopping_cart')
         ]
-
-    def __str__(self):
-        return f'Рецепт {self.recipe} в списке покупок у {self.user}'

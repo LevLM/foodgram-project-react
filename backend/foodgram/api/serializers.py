@@ -140,19 +140,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
         read_only_fields = ('user', 'recipe')
 
-    # def validate(self, data):
-    #     if ShoppingCart.objects.filter(
-    #             user=self.context['request'].user,
-    #             recipe=data['recipes']
-    #     ).exists():
-    #         raise serializers.ValidationError()
-    #     return data
-
-    # def to_representation(self, instance):
-    #     return RecipeMiniOutputSerializer(
-    #         instance.recipe,
-    #         context={'request': self.context.get('request')}
-    #     ).data
     def to_representation(self, instance):
         return RecipeMiniOutputSerializer(instance, context=self.context).data
 
@@ -164,19 +151,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
         read_only_fields = ('user', 'recipe')
 
-    # def validate(self, data):
-    #     if Favorite.objects.filter(
-    #             user=self.context.get('request').user,
-    #             recipe=data['recipe']
-    #     ).exists():
-    #         raise serializers.ValidationError()
-    #     return data
-
-    # def to_representation(self, instance):
-    #     return RecipeMiniOutputSerializer(
-    #         instance.recipe,
-    #         context={'request': self.context.get('request')}
-    #     ).data
     def to_representation(self, instance):
         return RecipeMiniOutputSerializer(instance, context=self.context).data
 
