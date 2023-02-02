@@ -1,4 +1,3 @@
-# from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
@@ -42,11 +41,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     filterset_fields = ('author', 'tags')
+    serializer_class = RecipeListSerializer
+    edit_serializer_class = RecipeSerializer
+
+    def get_permissions(self):
+        if self.action in (
+            "destroy",
+            "partial_update",
+        ):
+            return [
+                permission() for permission in self.edit_permission_classes]
+        return super().get_permissions()
 
     def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
-            return RecipeSerializer
-        return RecipeListSerializer
+        if self.action in (
+            "create",
+            "partial_update",
+        ):
+            return self.edit_serializer_class
+        return super().get_serializer_class()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

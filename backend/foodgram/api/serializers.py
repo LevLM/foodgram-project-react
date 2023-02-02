@@ -235,11 +235,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class RecipeListSerializer(serializers.ModelSerializer):
     author = UserSerializer(
-        default=serializers.CurrentUserDefault(), read_only=True
+        default=serializers.CurrentUserDefault(),
     )
     image = Base64ImageField(use_url=True)
     ingredients = IngredientNumberSerializer(
-        source='ingredient_number', many=True
+        source='ingredient_number', many=True,
     )
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
