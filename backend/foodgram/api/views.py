@@ -19,11 +19,11 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
+from .filters import IngredientFilter
 from .serializers import (FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, UserRecipeSerializer)
-from .filters import IngredientFilter
 
 
 class CreateListDestroyViewSet(
