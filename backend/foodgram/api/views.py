@@ -23,6 +23,7 @@ from .serializers import (FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, UserRecipeSerializer)
+from .filters import IngredientFilter
 
 
 class CreateListDestroyViewSet(
@@ -178,8 +179,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    search_fields = ('^name',)
+    # search_fields = ('^name',)
     pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
