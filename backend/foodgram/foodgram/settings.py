@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '@p7e4(u%)pz9ukqf18_0__hwrjn#59dwo&av)7^#nh=18t0t_6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '158.160.43.47', 'll-praktik.ddns.net', '*'
