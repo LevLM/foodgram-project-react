@@ -189,6 +189,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
                 ~Q(name__istartswith=name) & Q(name__icontains=name)
             )
             queryset = list(begin) + list(contain)
+            return queryset
         return queryset
 
 
