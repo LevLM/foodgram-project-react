@@ -133,3 +133,4 @@ dmypy.json
 
 .vscode/
 media/
+*.code-workspace
