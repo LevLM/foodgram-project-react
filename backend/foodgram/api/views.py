@@ -7,7 +7,7 @@ from django.template.loader import get_template
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from recipes.models import (Favorite, Follow, Ingredient, IngredientNumber,
-                            Recipe, ShoppingCart, Tag, TagRecipe)
+                            Recipe, ShoppingCart, Tag)
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
@@ -19,6 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
+from .filters import TagRecipeFilter
 from .serializers import (FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
@@ -44,7 +45,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     edit_permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    filterset_fields = ('author', 'tags')
+    # filterset_fields = ('author', 'tags')
+    filterser_class = TagRecipeFilter
     serializer_class = RecipeListSerializer
     edit_serializer_class = RecipeSerializer
 
@@ -94,14 +96,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 condition if is_in_shopping_cart == '1' else ~condition
             ).all()
-        tags = self.request.query_params.getlist('tags')
-        if tags:
-            tags = Tag.objects.filter(slug__in=tags).all()
-            recipes_id = (
-                TagRecipe.objects.filter(tag__in=tags).values(
-                    'recipe__id').distinct()
-            )
-            queryset = queryset.filter(id__in=recipes_id)
+        # tags = self.request.query_params.getlist('tags')
+        # if tags:
+        #     tags = Tag.objects.filter(slug__in=tags).all()
+        #     recipes_id = (
+        #         TagRecipe.objects.filter(tag__in=tags).values(
+        #             'recipe__id').distinct()
+        #     )
+        #     queryset = queryset.filter(id__in=recipes_id)
         author_id = self.request.query_params.get('author')
         if author_id:
             return (queryset.filter(author__id=author_id).all())

@@ -76,23 +76,29 @@ class Recipe(models.Model):
         return self.name
 
 
-class TagRecipe(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.RESTRICT,
-    )
+# class RecipeAbstract(models.Model):
+#     recipe = models.ForeignKey(
+#         Recipe,
+#         on_delete=models.CASCADE,
+#     )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                name='unique_recipe_tag',
-                fields=['recipe', 'tag'],
-            ),
-        ]
+#     class Meta:
+#         abstract = True
+
+
+# class TagRecipe(RecipeAbstract):
+#     tag = models.ForeignKey(
+#         Tag,
+#         on_delete=models.RESTRICT,
+#     )
+
+#     class Meta:
+#         constraints = [
+#             models.UniqueConstraint(
+#                 name='unique_recipe_tag',
+#                 fields=['recipe', 'tag'],
+#             ),
+#         ]
 
 
 class UserFollow(models.Model):
