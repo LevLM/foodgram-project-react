@@ -1,10 +1,10 @@
 from django_filters.rest_framework import CharFilter, FilterSet
-from recipes.models import Ingredient
+from recipes.models import Tag
 
 
-class IngredientFilter(FilterSet):
-    name = CharFilter(lookup_expr='startswith')
+class TagFilter(FilterSet):
+    name = CharFilter(field_name='name')
 
     class Meta:
-        model = Ingredient
+        model = Tag
         fields = ('name',)

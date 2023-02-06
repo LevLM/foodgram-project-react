@@ -19,7 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.permissions import IsAuthorOrReadOnly
 
-from .filters import IngredientFilter
+from .filters import TagFilter
 from .serializers import (FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
@@ -177,19 +177,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    # search_fields = ('^name',)
-    pagination_class = None
-    filterset_class = IngredientFilter
-
-
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = TagSerializer
     pagination_class = None
 
     def get_queryset(self):
-        return Tag.objects.all()
+        queryset = Ingredient.objects.all()
+        name = self.request.query_params.get('name')
+        if name is not None:
+            begin = queryset.filter(name__istartswith=name)
+            contain = queryset.filter(
+                ~Q(name__istartswith=name) & Q(name__icontains=name)
+            )
+            queryset = list(begin) + list(contain)
+        return queryset
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TagFilter
 
 
 class UserRecipeViewSet(
