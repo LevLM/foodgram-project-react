@@ -95,14 +95,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 condition if is_in_shopping_cart == '1' else ~condition
             ).all()
-        # tags = self.request.query_params.getlist('tags')
-        # if tags:
-        #     tags = Tag.objects.filter(slug__in=tags).all()
-        #     recipes_id = (
-        #         TagRecipe.objects.filter(tag__in=tags).values(
-        #             'recipe__id').distinct()
-        #     )
-        #     queryset = queryset.filter(id__in=recipes_id)
         author_id = self.request.query_params.get('author')
         if author_id:
             return (queryset.filter(author__id=author_id).all())
