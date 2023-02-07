@@ -131,7 +131,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                        recipe=recipe).exists():
             return Response({'error, Favorite not found'},
                             status=status.HTTP_404_NOT_FOUND)
-        Favorite.objects.get(recipe=recipe).delete()
+        Favorite.objects.get(user=user, recipe=recipe).delete()
         return Response('Recipe deleted from Favorite',
                         status=status.HTTP_204_NO_CONTENT)
 
@@ -157,7 +157,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                            recipe=recipe).exists():
             return Response({'error, ShoppingCart not found'},
                             status=status.HTTP_404_NOT_FOUND)
-        ShoppingCart.objects.get(recipe=recipe).delete()
+        ShoppingCart.objects.get(user=user, recipe=recipe).delete()
         return Response('Recipe deleted from ShoppingCart',
                         status=status.HTTP_204_NO_CONTENT)
 
