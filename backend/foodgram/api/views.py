@@ -45,8 +45,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     edit_permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    # filterset_fields = ('author', 'tags')
-    filterser_class = TagRecipeFilter
+    filterset_class = TagRecipeFilter
     serializer_class = RecipeListSerializer
     edit_serializer_class = RecipeSerializer
 
