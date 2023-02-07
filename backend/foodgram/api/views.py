@@ -43,10 +43,10 @@ class TokenCreateView(views.TokenCreateView):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     edit_permission_classes = (IsAuthorOrReadOnly,)
-    # filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     # filterset_fields = ('author', 'tags')
-    # filterser_class = TagRecipeFilter
+    filterser_class = TagRecipeFilter
     serializer_class = RecipeListSerializer
     edit_serializer_class = RecipeSerializer
 
@@ -70,10 +70,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True,
-            filter_backends=(DjangoFilterBackend,),
-            filterser_class=TagRecipeFilter
-            )
     def get_queryset(self):
         queryset = Recipe.objects.all()
         user = self.request.user
